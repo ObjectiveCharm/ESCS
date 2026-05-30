@@ -1,4 +1,4 @@
 [tools]
 arduino-cli = "1"
 python = "3.14"
-uv = "latest"
+uv = "0.11"
