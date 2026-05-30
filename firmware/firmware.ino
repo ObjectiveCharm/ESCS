@@ -21,6 +21,7 @@ const int MOTOR_PINS[N_MOTOR_PIN] = {PIN_MOTOR_L1, PIN_MOTOR_L2, PIN_MOTOR_L3,
                                      PIN_MOTOR_R3, PIN_MOTOR_R4};
 
 enum class MotorDirection { FORWARD, BACKWARD, STOP };
+enum class Side { LEFT, RIGHT };
 
 void setMotor(int in1, int in2, MotorDirection dir) {
   switch (dir) {
@@ -55,15 +56,40 @@ void driveMotor_RB(MotorDirection dir) {
   setMotor(PIN_MOTOR_R1, PIN_MOTOR_R2, dir);
 }
 
-void drive(MotorDirection leftDir, MotorDirection rightDir) {
-  driveMotor_LF(leftDir);
-  driveMotor_LB(leftDir);
+void driveWheels(MotorDirection lfDir, MotorDirection lbDir,
+                 MotorDirection rfDir, MotorDirection rbDir) {
+  driveMotor_LF(lfDir);
+  driveMotor_LB(lbDir);
 
-  driveMotor_RF(rightDir);
-  driveMotor_RB(rightDir);
+  driveMotor_RF(rfDir);
+  driveMotor_RB(rbDir);
 }
 
-void stopCar() { drive(MotorDirection::STOP, MotorDirection::STOP); }
+void driveSides(MotorDirection leftDir, MotorDirection rightDir) {
+  driveWheels(leftDir, leftDir, rightDir, rightDir);
+}
+
+void driveStraight(MotorDirection dir) { driveSides(dir, dir); }
+
+void spin(Side side) {
+  if (side == Side::LEFT) {
+    driveSides(MotorDirection::BACKWARD, MotorDirection::FORWARD);
+  } else {
+    driveSides(MotorDirection::FORWARD, MotorDirection::BACKWARD);
+  }
+}
+
+void arcForward(Side side) {
+  if (side == Side::LEFT) {
+    driveWheels(MotorDirection::FORWARD, MotorDirection::BACKWARD,
+                MotorDirection::FORWARD, MotorDirection::FORWARD);
+  } else {
+    driveWheels(MotorDirection::FORWARD, MotorDirection::FORWARD,
+                MotorDirection::FORWARD, MotorDirection::BACKWARD);
+  }
+}
+
+void stopCar() { driveSides(MotorDirection::STOP, MotorDirection::STOP); }
 
 void setup() {
   Serial.begin(115200);
@@ -86,30 +112,22 @@ void loop() {
 
     switch (cmd) {
     case 'F':
-      drive(MotorDirection::FORWARD, MotorDirection::FORWARD);
+      driveStraight(MotorDirection::FORWARD);
       break;
     case 'B':
-      drive(MotorDirection::BACKWARD, MotorDirection::BACKWARD);
+      driveStraight(MotorDirection::BACKWARD);
       break;
     case 'A':
-      drive(MotorDirection::BACKWARD, MotorDirection::FORWARD);
+      spin(Side::LEFT);
       break;
     case 'D':
-      drive(MotorDirection::FORWARD, MotorDirection::BACKWARD);
+      spin(Side::RIGHT);
       break;
     case 'L':
-      driveMotor_LF(MotorDirection::FORWARD);
-      driveMotor_LB(MotorDirection::BACKWARD);
-
-      driveMotor_RF(MotorDirection::FORWARD);
-      driveMotor_RB(MotorDirection::FORWARD);
+      arcForward(Side::LEFT);
       break;
     case 'R':
-      driveMotor_LF(MotorDirection::FORWARD);
-      driveMotor_LB(MotorDirection::FORWARD);
-
-      driveMotor_RF(MotorDirection::FORWARD);
-      driveMotor_RB(MotorDirection::BACKWARD);
+      arcForward(Side::RIGHT);
       break;
     case 'S':
       stopCar();
