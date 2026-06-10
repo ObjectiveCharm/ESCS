@@ -3,8 +3,12 @@ name = "gcsc"
 version = "0.1.0"
 description = "WIP"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.12,<3.13"
 dependencies = [
+    "jax>=0.4.38,<0.5",
+    "jaxlib>=0.4.38,<0.5",
+    "mediapipe>=0.10.21,<0.10.22",
+    "opencv-contrib-python>=4.11",
     "pyserial>=3.5",
 ]
 
@@ -13,6 +17,7 @@ members = ["."]
 
 [project.scripts]
 gcsc-controller = "tools.controller:main"
+gcsc-gesture-controller = "tools.gesture_controller:main"
 
 [build-system]
 requires = ["setuptools>=80"]

@@ -4,13 +4,29 @@ import argparse
 import os
 import sys
 import time
+from collections.abc import Mapping
 
 import serial
 
-DEFAULT_PORT = os.environ.get("GCSC_PORT", "/dev/rfcomm0")
+MACOS_DEFAULT_PORT = "/dev/cu.roboS"
+DEFAULT_PORT_ENV_VAR = "GCSC_PORT"
 BAUD_RATE = 115200
 CONNECT_DELAY_SECONDS = 2.0
 WRITE_TIMEOUT_SECONDS = 1.0
+
+
+def default_port(
+    os_name: str = os.name,
+    environ: Mapping[str, str] = os.environ,
+) -> str:
+    configured_port = environ.get(DEFAULT_PORT_ENV_VAR)
+    if configured_port:
+        return configured_port
+
+    return MACOS_DEFAULT_PORT
+
+
+DEFAULT_PORT = default_port()
 
 KEY_COMMANDS = {
     "w": ("F", "forward"),
